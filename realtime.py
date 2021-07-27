@@ -1,9 +1,6 @@
 import streamlit as st
-from datetime import datetime
-import pandas as pd
-
-st.set_page_config(
-    layout="wide")
+import ner_finder
+import otp_request
 
 
 def load_page():
@@ -11,95 +8,41 @@ def load_page():
     col1, col2 = st.beta_columns(2)
 
     with col1:
-        st.text_area('Введите текст в это поле, после чего нажмите кнопку "Проверить наличие имен"', height=700)
-        st.button("Проверить наличие имен")
+        button_name = "Найти имена, места и организации"
+        input_text = st.text_area('Начните набирать текст в поле. Когда готово, нажмите  "%s"' % button_name, height=700)
+        st.button(button_name)
+        names = ner_finder.finder(input_text)
 
     with col2:
         st.subheader('Параметры фильтрации')
 
-        names = ['Владимир', 'ГИБДД по Владимирской области', 'Пожар', 'ДТП', 'Владимир Жириновский', 'Администрация '
-                                                                                                      'Владимирской '
-                                                                                                      'области',
-                 'Ковровский район', 'МЧС по Владимирской области', 'Убийство', 'Владмимир Путин']
-        st.multiselect("Выберите имя, место и/или организацию", names)
+        ne = st.multiselect("Выберите имя, место и/или организацию", names)
 
-        article1 = 'Встреча с послом Италии в миде Грузии'
-        article2 = "Дмитрий Медведев напомнил министрам о проводимом проекте по внедрению СПО"
-        article3 = "Дмитрий Медведев рассказал, какие проблемы поможет решить СПО"
+        sources_list = otp_request.get_source(ne)
+        sources = st.multiselect('Выберите источник', sources_list)
 
-        sources = ["Коммерсант", "РБК", "Известия"]
-        st.multiselect('Выберите источник', sources)
+        topics_list = otp_request.get_topics(ne, sources)
+        topics = st.multiselect("Выберите одну или несколько рубрик", topics_list)
 
-        news = pd.read_csv("news_v2.csv")
-        genres = news["rubric"].unique()
+        dates = st.date_input("Задайте период поиска", value=[])
 
-        st.multiselect("Выберите одну или несколько тем", genres)
+        filtered_df = otp_request.get_filtered_data(ne, topics, dates, sources)
 
-        st.date_input("Введите период",
-                      value=[])
+        if len(filtered_df) == 100:
+            st.write("Я нашёл более 100 статей. Показываю последние 30 из них.")
+            filtered_df = filtered_df[-30:]
+        elif len(filtered_df) > 30:
+            st.write("Всего я нашёл %d статей. Показываю последние 30 из них." % len(filtered_df))
+            filtered_df = filtered_df[-30:]
+        else:
+            st.write("Всего я нашёл %d статей." % len(filtered_df))
+        article_names = [": ".join(x) for x in list(zip(filtered_df["source"], filtered_df["title"].values))]
 
-        selected_article = st.selectbox("Выберите статью",
-                                        (article1, article2, article3)
-                                        )
-        articles = news["title"].unique()
+        selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
 
-        st.selectbox("Выберите статью", articles)
+    article = filtered_df[filtered_df["title"] == selected_article.split(": ")[1]]
 
-    if selected_article == article1:
-        st.header('Назавание статьи')
-        st.subheader("Встреча с послом Италии в миде Грузии")
-
-        st.header('Дата:')
-        st.subheader('26.04.2021')
-
-        st.header('Автор')
-        st.subheader('Иван Иванов')
-
-        st.header('Рубрика')
-        st.subheader('Политика')
-
-        st.header('Текст статьи:')
-        st.write(
-            "Встреча с послом Италии в миде Грузии \n По инициативе итальянской стороны чрезвычайный и полномочный "
-            "посол Италии в Грузии Виторио Сандали встретился с заместителем министра иностранных дел Грузии "
-            "Александром Налбандовым. Предметом обсуждения стали вопросы сотрудничества в международных организациях.")
-
-    elif selected_article == article2:
-        st.header('Назавание статьи')
-        st.subheader('Дмитрий Медведев напомнил министрам о проводимом проекте по внедрению СПО')
-
-        st.header('Дата:')
-        st.subheader('15.08.2010')
-
-        st.header('Автор')
-        st.subheader('Александр Овечкин')
-
-        st.header('Рубрика')
-        st.subheader('Политика')
-
-        st.header('Текст статьи:')
-        st.write(
-            "На заседании Совета при Президенте РФ по развитию информационного общества глава РФ Дмитрий Медведев "
-            "напомнил министрам о проводимом проекте по внедрению свободного программного обеспечения (СПО) на базе "
-            "платформы Linux. \n Президент отметил, что о ходе проведения проекта доходят разные сигналы, в том числе, "
-            "что работа заглохла, а многие ведомства продолжают покупать разрозненные программы, на что тратятся "
-            "большие бюджетные средства. Было поручено доложить на этот счёт.")
-
-    elif selected_article == article3:
-        st.header('Назавание статьи')
-        st.subheader('Дмитрий Медведев рассказал, какие проблемы поможет решить СПО')
-
-        st.header('Дата:')
-        st.subheader('18.11.2010')
-
-        st.header('Автор')
-        st.subheader('Андрей Орлов')
-
-        st.header('Рубрика')
-        st.subheader('Политика')
-
-        st.header('Текст статьи:')
-        st.write(
-            "В качестве примера проблем в сфере информатизации были, в частности, приведены формируемые электронные "
-            "библиотеки, которыми неудобно пользоваться ввиду отсутствия единой технологической основы. "
-            "Дмитрий Медведев подчеркнул, что такие проблемы СПО может решить.")
+    st.header(article["title"].values[0])
+    st.subheader(article["date"].values[0])
+    st.subheader('Рубрика: %s' % article["topic"].values[0])
+    st.write(article["text"].values[0])
