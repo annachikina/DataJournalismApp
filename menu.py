@@ -1,13 +1,22 @@
 import streamlit as st
-
 import archive
-import test
+import realtime
+import stats
+import analysis
 
-st.sidebar.title("Menu")
-app_mode = st.sidebar.selectbox("Please select a page", ["RealTime",
-                                                         "Archive"])
+st.set_page_config(
+    page_title="Помощник журналиста",
+    layout="wide")
 
-if app_mode == "RealTime":
-    test.load_page()
-elif app_mode == "Archive":
+st.sidebar.title("Меню")
+app_mode = st.sidebar.selectbox("Выберите страницу", ["Помощник журналиста",
+                                                      "Архив статей", "Статистика", 'Аналитика'])
+
+if app_mode == "Помощник журналиста":
+    realtime.load_page()
+elif app_mode == "Архив статей":
     archive.load_page()
+elif app_mode == "Статистика":
+    stats.load_page()
+elif app_mode == "Аналитика":
+    analysis.load_page()
