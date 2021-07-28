@@ -1,6 +1,5 @@
 from ot_simple_connector.connector import Connector
 import pandas as pd
-import numpy as np
 import time
 
 host = '192.168.4.65'

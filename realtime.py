@@ -9,7 +9,8 @@ def load_page():
 
     with col1:
         button_name = "Найти имена, места и организации"
-        input_text = st.text_area('Начните набирать текст в поле. Когда готово, нажмите  "%s"' % button_name, height=700)
+        input_text = st.text_area('Начните набирать текст в поле. Когда готово, нажмите  "%s"' % button_name,
+                                  height=700)
         st.button(button_name)
         names = ner_finder.finder(input_text)
 
