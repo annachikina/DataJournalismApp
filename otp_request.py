@@ -9,6 +9,15 @@ password = '12345678'
 conn = Connector(host, port, user, password, loglevel="DEBUG")
 
 
+def get_dedup_list(param):
+    query_text = "| inputlookup news_kw_ne_expand.csv | fields %s | dedup %s" % (param, param)
+    cache_ttl = 59
+    tws = 11
+    twf = 22
+    job = conn.jobs.create(query_text=query_text, cache_ttl=cache_ttl, tws=tws, twf=twf, blocking=True)
+    return pd.DataFrame(job.dataset.load())[param].values
+
+
 def get_filtered_data(ne, topic, dates, source):
     query_text = "| inputlookup news_kw_ne_expand.csv "
     for params, col_name in [(ne, "ner"), (topic, "topic"), (source, "source")]:
