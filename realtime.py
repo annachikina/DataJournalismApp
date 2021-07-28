@@ -5,6 +5,7 @@ import otp_request
 
 def load_page():
     st.title('Помощник журналиста')
+    st.header('На этой странице можно просмотреть все релевантные статьи к готовящемуся материалу')
     col1, col2 = st.beta_columns(2)
 
     with col1:

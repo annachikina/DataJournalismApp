@@ -10,7 +10,7 @@ conn = Connector(host, port, user, password, loglevel="DEBUG")
 
 
 def get_filtered_data(ne, topic, dates, source):
-    query_text = "| inputlookup news_kw_ne.csv "
+    query_text = "| inputlookup news_kw_ne_expand.csv "
     for params, col_name in [(ne, "ner"), (topic, "topic"), (source, "source")]:
         if len(params) == 0:
             continue
@@ -32,7 +32,7 @@ def get_filtered_data(ne, topic, dates, source):
 
 
 def get_source(ne):
-    query_text = "| inputlookup news_kw_ne.csv "
+    query_text = "| inputlookup news_kw_ne_expand.csv "
     for params, col_name in [(ne, "ner")]:
         if len(params) == 0:
             continue
@@ -50,7 +50,7 @@ def get_source(ne):
 
 
 def get_topics(ne, source):
-    query_text = "| inputlookup news_kw_ne.csv "
+    query_text = "| inputlookup news_kw_ne_expand.csv "
     for params, col_name in [(ne, "ner"), (source, "source")]:
         if len(params) == 0:
             continue
