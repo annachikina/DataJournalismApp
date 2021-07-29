@@ -7,7 +7,8 @@ def load_page():
     st.title('Архив статей')
     st.header('На этой странице можно провести поиск по всему архиву')
 
-    st.subheader('Введите имя и/или ключевое слово')
+    st.subheader('Введите имя и/или ключевое слово. '
+                 'Я найду все статьи, где они упоминаются отдельно или внутри другого названия.')
 
     ne = st.text_input('Введите имя, место и/или название организации')
 
@@ -27,12 +28,26 @@ def load_page():
         sources_list = list(set(archive_df["source"].values))
         sources = st.multiselect('Выберите источники', sources_list)
 
-        filtered_df = otp_request.get_filtered_data([],
-                                                    [],
+        if ne == "" and kw == "":
+            ne_list = []
+            kw_list = []
+            index_list = []
+        elif len(archive_df) < 50:
+            index_list = archive_df["art_ind"].values
+            ne_list = []
+            kw_list = []
+        else:
+            st.write("Статей нашлось слишком много. Я буду искать только точные упоминания заданных слов.")
+            ne_list = [ne]
+            kw_list = [kw]
+            index_list = []
+
+        filtered_df = otp_request.get_filtered_data(ne_list,
+                                                    kw_list,
                                                     topics,
                                                     dates,
                                                     sources,
-                                                    index=archive_df["index"].values)
+                                                    index=index_list)
 
         if len(filtered_df) == 100:
             st.write("Я нашёл более 100 статей. Показываю последние 30 из них.")
@@ -42,15 +57,13 @@ def load_page():
             filtered_df = filtered_df[-30:]
         else:
             st.write("Всего я нашёл %d статей." % len(filtered_df))
-        # article_names = [": ".join(x) for x in list(zip(filtered_df["source"], filtered_df["title"].values))]
-        article_names = filtered_df["index"].values
 
+        article_names = filtered_df["art_ind"].values
         selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
         [date, title] = selected_article.split(": ")
 
-        # article = filtered_df[filtered_df["title"] == selected_article.split(": ")[1]]
         article = otp_request.get_article_by_index(selected_article)["text"].values[0]
-        article_params = filtered_df[filtered_df["index"] == selected_article]
+        article_params = filtered_df[filtered_df["art_ind"] == selected_article]
 
         st.header(title)
         st.subheader(date)
