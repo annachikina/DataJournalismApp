@@ -24,7 +24,7 @@ def get_filtered_archive(ne, kw):
         if len(param) == 0:
             continue
         query_text += '| where like(' + col_name + ', "%' + param + '%") '
-    query_text += "| fields index, _time, topic, source | dedup index | sort _time | tail 100"
+    query_text += "| fields _time, art_ind, topic, source | dedup art_ind | sort _time | tail 100"
     cache_ttl = 59
     tws = 11
     twf = 22
@@ -34,7 +34,7 @@ def get_filtered_archive(ne, kw):
 
 def get_filtered_data(ne, kw, topic, dates, source, index=[]):
     query_text = "| inputlookup kw_ne_ind.csv "
-    for params_list, col_name in [(ne, "ner"), (topic, "topic"), (source, "source"), (kw, "kw"), (index, "index")]:
+    for params_list, col_name in [(ne, "ner"), (topic, "topic"), (source, "source"), (kw, "kw"), (index, "art_ind")]:
         params = [p for p in params_list if len(p) > 0]
         if len(params) == 0:
             continue
@@ -47,7 +47,7 @@ def get_filtered_data(ne, kw, topic, dates, source, index=[]):
         start = time.mktime(start.timetuple())
         end = time.mktime(end.timetuple())
         query_text += "| search _time>%s AND _time<%s " % (start, end)
-    query_text += "| fields index, _time, topic | dedup index | sort _time | tail 100"
+    query_text += "| fields art_ind, _time, topic | dedup art_ind | sort _time | tail 100"
     cache_ttl = 59
     tws = 11
     twf = 22
@@ -57,7 +57,7 @@ def get_filtered_data(ne, kw, topic, dates, source, index=[]):
 
 def get_article_by_index(index):
     query_text = "| inputlookup text_ind.csv "
-    query_text += '| where index = "%s" ' % index
+    query_text += '| where art_ind = "%s" ' % index
     cache_ttl = 59
     tws = 11
     twf = 22
