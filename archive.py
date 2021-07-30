@@ -1,6 +1,6 @@
 import streamlit as st
 import analysis
-import otp_request
+from util import otp_request
 
 
 def load_page():
@@ -69,9 +69,3 @@ def load_page():
         st.subheader(date)
         st.subheader('Рубрика: %s' % article_params["topic"].values[0])
         st.write(article)
-
-    if st.button('Посмотреть статистику'):
-        analysis.load_page()
-
-    else:
-        st.write('Нажмите, чтобы увидеть аналитику по статьям')

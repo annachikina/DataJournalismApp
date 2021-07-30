@@ -3,3 +3,4 @@ pandas~=0.25.3
 numpy~=1.18.0
 natasha~=1.4.0
 git+git:https://github.com/ISGNeuroTeam/ot_simple_connector
+altair~=4.1.0

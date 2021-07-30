@@ -1,6 +1,5 @@
 import streamlit as st
-import ner_finder
-import otp_request
+from util import ner_finder, otp_request
 
 
 def load_page():
