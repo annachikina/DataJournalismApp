@@ -1,103 +1,106 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import altair as alt
+
+
+def plot_chart(data, x, y, x_title, y_title="", height=850):
+    return (alt
+            .Chart(data, height=height)
+            .mark_bar(tooltip=alt.TooltipContent('encoding'))
+            .encode(x=alt.X(x,
+                            title=x_title,
+                            axis=alt.Axis(labelFontSize=12)),
+                    y=alt.Y(y,
+                            sort=alt.EncodingSortField(field=x, order="descending"),
+                            title=y_title,
+                            axis=alt.Axis(labelFontSize=14)
+                            ),
+                    color=alt.Color(y,
+                                    legend=None,
+                                    scale=alt.Scale(scheme="category10"),
+                                    )
+                    )
+            )
 
 
 def load_page():
     st.title("Статистика архива")
-
     st.header("Эта страница техническая. Здесь можно увидеть обзор всех материалов архива")
+    stats_selected = st.selectbox("Выберите источник", ["Все источники", "Лента", "Новости 33"])
 
-    col1, col2 = st.beta_columns(2)
+    if stats_selected == "Все источники":
+        col1, col2 = st.beta_columns(2)
 
-    with col1:
-        news = pd.read_csv("news_v2.csv")
-        date = news["date"].unique()
-        dx = news["index"].unique()
-        df = pd.read_csv('news_keywords.csv')
+        with col1:
 
-        bch = df["topic"].value_counts()
-        st.bar_chart(bch, height=800)
+            # ТОП СУЩНОСТЕЙ
+            ner = pd.read_csv('data/ner_top1000.csv')
+            ner_data = ner.iloc[:10]
+            ner_chart = plot_chart(ner_data, "count", "ner", "Количество упоминаний")
+            st.subheader('Топ-10 самых частоупоминаемых явлений в материалах архива')
+            st.altair_chart(ner_chart, use_container_width=True)
 
-        top = [('Владимир', 7546),
-               ('ГИБДД по Владимирской области', 7412),
-               ('Пожар', 6124),
-               ('ДТП', 6042),
-               ('Владимир Жириновский', 5234),
-               ('Администрация Владимирской области', 5211),
-               ('Ковровский район', 5126),
-               ('МЧС по Владимирской области', 5032),
-               ('Убийство', 4831),
-               ('Путин', 4752),
-               ]
+            # ГРАФИК ПО ВСЕМ ДАТАМ
+            alldat = pd.read_csv('data/final_date.csv')
+            date_stats = alldat.set_index('Дата').sort_index()[-24:]
+            st.subheader('Количество опубликованных материалов за последние 2 года')
+            st.line_chart(date_stats, height=500)
 
-        top_data = pd.DataFrame(top, columns=['Имя, место, организация', 'Количество упоминаний'],
-                                index=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
-        st.subheader('Топ-10 самых частоупоминаемых явлений в материалах архива')
-        st.dataframe(top_data)
+        with col2:
 
-        a = news.set_index('rubric')
-        count1 = a.loc['Новости 33; Общество']
-        count2 = a.loc['Новости 33; Происшествия 33']
-        count3 = a.loc['Новости 33; Культура']
-        count4 = a.loc['Новости 33; Власть']
-        count5 = a.loc['Новости 33']
-        count6 = a.loc['Новости 33; Спорт']
-        count7 = a.loc['Новости 33; Помоги!']
-        count8 = a.loc['Новости 33; Здоровье 33']
-        count9 = a.loc['Новости 33; ДТП во Владимирской области']
-        count10 = a.loc['Новости 33; Цифра дня']
-        count11 = a.loc['Новости 33; Выходные во Владимире']
+            # ГРАФИК ПО ВСЕМ РУБРИКАМ
+            alltop = pd.read_csv('data/all_topic.csv')
+            topic_chart = plot_chart(alltop, "Количество статей", "Рубрика", "Количество статей")
+            st.subheader('Количество всех статей по рубрикам')
+            st.altair_chart(topic_chart, use_container_width=True)
 
-        d1 = {'Количество материалов': [len(count1), len(count2), len(count3), len(count4), len(count5), len(count6),
-                                        len(count7), len(count8), len(count9), len(count10), len(count11)]}
-        i1 = {'Новости 33; Общество',
-              'Новости 33; Происшествия 33',
-              'Новости 33; Культура',
-              'Новости 33; Власть',
-              'Новости 33',
-              'Новости 33; Спорт',
-              'Новости 33; Помоги!',
-              'Новости 33; Здоровье 33',
-              'Новости 33; ДТП во Владимирской области',
-              'Новости 33; Цифра дня',
-              'Новости 33; Выходные во Владимире'}
+            # ГРАФИК КОЛИЧЕСТВО СТАТЕЙ ПО ГОДАМ
+            yeardat = pd.read_csv('data/year_date.csv')
+            year_stats = yeardat.set_index('Год')
+            st.subheader('Количество доступных опубликованных материалов по годам')
+            st.bar_chart(year_stats, height=500)
 
-        bc = pd.DataFrame(data=d1, index=i1)
+        # ГРАФИК ПО ИСТОЧНИКАМ
+        source_data = pd.read_csv('data/all_source.csv')
+        st.subheader('Количество статей в доступных источниках')
+        source_chart = plot_chart(source_data, "Источник", "Количество статей", "Источник", height=500)
+        st.altair_chart(source_chart, use_container_width=True)
 
-        st.subheader('Количество материалов по рубрикам')
-        st.bar_chart(bc, height=800)
-        st.markdown('График показывает общее количество материалов в зависимости от доступных рубрик')
+    elif stats_selected == "Лента":
+        col1, col2 = st.beta_columns(2)
 
-    with col2:
-        artnum = {'Количество статей': [4256, 4562, 4823, 4561, 4816, 4823, 4789, 5713, 4876, 4568, 4862, 5681, 4568,
-                                        4568, 5698, 5486, 5238, 4852, 4962, 4123, 4762, 4213, 5687, 4798, 4465, 5687,
-                                        4568, 4821, 5668, 4587, 5748]}
-        linechart_data = pd.DataFrame(data=artnum,
-                                      columns=['Количество статей'],
-                                      index=['01.07', '02.07', '03.07', '04.07', '05.07', '06.07', '07.07', '08.07',
-                                             '09.07', '10.07', '11.07', '12.07', '13.07', '14.07', '15.07', '16.07',
-                                             '17.07', '18.07', '19.07', '20.07', '21.07', '22.07', '23.07', '24.07',
-                                             '25.07', '26.07', '27.07', '28.07', '29.07', '30.07', '31.07'])
+        with col1:
 
-        st.subheader('Количество статей за последний месяц')
-        st.line_chart(linechart_data)
-        st.markdown('На графике отображено общее количество статей в архиве, опубликованных за последний месяц')
+            # ГРАФИК ПО РУБРИКАМ ЛЕНТЫ
+            lentop = pd.read_csv('data/lenta_topic.csv')
+            st.subheader('Количество всех статей по рубрикам')
+            lenta_topic_chart = plot_chart(lentop, "Количество статей", "Рубрика", "Количество статей")
+            st.altair_chart(lenta_topic_chart, use_container_width=True)
 
-        d2 = {'Политика': [1404, 4545, 3656], "Экономика": [4482, 1244, 3975], "Происшествия": [1244, 904, 2566]}
-        i2 = {"РБК", "Коммерсант", "Известия"}
+        with col2:
 
-        barchart_data2 = pd.DataFrame(data=d2, index=i2)
+            # ГРАФИК ПО ДАТАМ ЛЕНТЫ
+            lendat = pd.read_csv('data/lenta_date_final.csv')
+            lenta_date_stats = lendat.set_index('Дата')
+            ld = lenta_date_stats.sort_index()
+            st.subheader('Количество опубликованных материалов по времени')
+            st.line_chart(ld, height=500)
 
-        st.subheader('Количество материалов по тематике')
-        st.bar_chart(barchart_data2, width=100)
-        st.markdown('На графике показано, в какой тематике публиковались материалы')
+    elif stats_selected == "Новости 33":
+        col1, col2 = st.beta_columns(2)
 
-        linechart_data2 = pd.DataFrame(
-            np.random.randn(31, 3),
-            columns=['РБК', 'Коммерсант', 'Известия'])
+        with col1:
 
-        st.subheader('Количество статей в СМИ за месяц')
-        st.line_chart(linechart_data2)
-        st.markdown('График показывает, сколько материалов выходило каждый день в течение '
-                    'заданного периода в различных СМИ')
+            # ГРАФИК ПО РУБРИКАМ НОВОСТИ 33
+            n33top = pd.read_csv('data/news33_topic.csv')
+            st.subheader('Количество всех статей по рубрикам')
+            news33_topic_chart = plot_chart(n33top, "Количество статей", "Рубрика", "Количество статей")
+            st.altair_chart(news33_topic_chart, use_container_width=True)
+
+        with col2:
+
+            # ГРАФИК ПО ДАТАМ НОВОСТИ 33
+            n33dat = pd.read_csv('data/news33_date_final.csv')
+            n33_date_stats = n33dat.set_index('Дата')
+            st.subheader('Количество опубликованных материалов по времени')
+            st.line_chart(n33_date_stats, height=500)
