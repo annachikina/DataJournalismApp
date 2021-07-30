@@ -74,7 +74,7 @@ def load_page():
             # ГРАФИК ПО РУБРИКАМ ЛЕНТЫ
             lentop = pd.read_csv('data/lenta_topic.csv')
             st.subheader('Количество всех статей по рубрикам')
-            lenta_topic_chart = plot_chart(lentop, "Количество статей", "Рубрика", "Количество статей")
+            lenta_topic_chart = plot_chart(lentop, "Количество статей", "Рубрика", "Количество статей", height=500)
             st.altair_chart(lenta_topic_chart, use_container_width=True)
 
         with col2:
@@ -94,7 +94,7 @@ def load_page():
             # ГРАФИК ПО РУБРИКАМ НОВОСТИ 33
             n33top = pd.read_csv('data/news33_topic.csv')
             st.subheader('Количество всех статей по рубрикам')
-            news33_topic_chart = plot_chart(n33top, "Количество статей", "Рубрика", "Количество статей")
+            news33_topic_chart = plot_chart(n33top, "Количество статей", "Рубрика", "Количество статей", height=500)
             st.altair_chart(news33_topic_chart, use_container_width=True)
 
         with col2:
