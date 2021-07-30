@@ -19,6 +19,7 @@ def load_page():
         st.subheader('Параметры фильтрации')
 
         ne = st.multiselect("Выберите имя, место и/или организацию", names)
+        ne = [n.lower() for n in ne]
 
         sources_list = otp_request.get_source(ne)
         sources = st.multiselect('Выберите источник', sources_list)
@@ -28,23 +29,24 @@ def load_page():
 
         dates = st.date_input("Задайте период поиска", value=[])
 
-        filtered_df = otp_request.get_filtered_data(ne, topics, dates, sources)
+        filtered_df = otp_request.get_filtered_data(ne, [], topics, dates, sources)
 
         if len(filtered_df) == 100:
             st.write("Я нашёл более 100 статей. Показываю последние 30 из них.")
-            filtered_df = filtered_df[-30:]
+            filtered_df = filtered_df.sort_values(by="_time", ascending=False)[:30]
         elif len(filtered_df) > 30:
             st.write("Всего я нашёл %d статей. Показываю последние 30 из них." % len(filtered_df))
-            filtered_df = filtered_df[-30:]
+            filtered_df = filtered_df.sort_values(by="_time", ascending=False)[:30]
         else:
             st.write("Всего я нашёл %d статей." % len(filtered_df))
-        article_names = [": ".join(x) for x in list(zip(filtered_df["source"], filtered_df["title"].values))]
-
+        article_names = filtered_df["art_ind"].values
         selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
+        [date, title] = selected_article.split(": ")
 
-    article = filtered_df[filtered_df["title"] == selected_article.split(": ")[1]]
+    article = otp_request.get_article_by_index(selected_article)["text"].values[0]
+    article_params = filtered_df[filtered_df["art_ind"] == selected_article]
 
-    st.header(article["title"].values[0])
-    st.subheader(article["date"].values[0])
-    st.subheader('Рубрика: %s' % article["topic"].values[0])
-    st.write(article["text"].values[0])
+    st.header(title)
+    st.subheader(date)
+    st.subheader('Рубрика: %s' % article_params["topic"].values[0])
+    st.write(article)
