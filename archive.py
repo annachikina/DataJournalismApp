@@ -74,4 +74,6 @@ def load_page():
         st.header(title)
         st.subheader(date)
         st.subheader('Рубрика: %s' % article_params["topic"].values[0])
-        st.write(article)
+        col1, _ = st.beta_columns([3, 1])
+        with col1:
+            st.write(article)  # TODO add newlines with "\n\r"
