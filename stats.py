@@ -3,7 +3,7 @@ import pandas as pd
 import altair as alt
 
 
-def plot_chart(data, x, y, x_title, y_title="", height=850):
+def plot_chart(data, x, y, x_title, y_title="", height=500):
     return (alt
             .Chart(data, height=height)
             .mark_bar(tooltip=alt.TooltipContent('encoding'))
@@ -59,6 +59,8 @@ def load_page():
             year_stats = yeardat.set_index('Год')
             st.subheader('Количество доступных опубликованных материалов по годам')
             st.bar_chart(year_stats, height=500)
+            # TODO: place legend at the left?
+            # TODO: group barchart by source
 
         # ГРАФИК ПО ИСТОЧНИКАМ
         source_data = pd.read_csv('data/all_source.csv')
