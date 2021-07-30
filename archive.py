@@ -6,26 +6,33 @@ def load_page():
     st.title('Архив статей')
     st.header('На этой странице можно провести поиск по всему архиву')
 
-    st.subheader('Введите имя и/или ключевое слово. '
-                 'Я найду все статьи, где они упоминаются отдельно или внутри другого названия.')
+    with st.form("search_form"):
+        st.subheader('Введите имя и/или ключевое слово. '
+                     'Я найду все статьи, где они упоминаются отдельно или внутри другого названия.')
 
-    ne = st.text_input('Введите имя, место и/или название организации')
+        ne = st.text_input('Введите имя, место и/или название организации')
+        kw = st.text_input('Введите ключевое слово')
 
-    kw = st.text_input('Введите ключевое слово')
+        st.form_submit_button("Поиск")
 
     archive_df = otp_request.get_filtered_archive(ne, kw)
     if len(archive_df) == 0:
         st.write("Не удалось найти в архиве подходящие материалы, попробуйте новый поиск")
     else:
-        st.subheader('Задайте фильтры')
+        with st.form("filter_form"):
+            st.subheader('Задайте фильтры')
+            col1, col2, col3 = st.beta_columns([2, 2, 1])
 
-        genres = list(set(archive_df["topic"].values))
-        topics = st.multiselect("Выберите одну или несколько тем", genres)
+            with col1:
+                genres = list(set(archive_df["topic"].values))
+                topics = st.multiselect("Выберите одну или несколько тем", genres)
+            with col3:
+                dates = st.date_input("Введите период", value=[])
+            with col2:
+                sources_list = list(set(archive_df["source"].values))
+                sources = st.multiselect('Выберите источники', sources_list)
 
-        dates = st.date_input("Введите период", value=[])
-
-        sources_list = list(set(archive_df["source"].values))
-        sources = st.multiselect('Выберите источники', sources_list)
+            st.form_submit_button("Применить фильтры")
 
         if ne == "" and kw == "":
             ne_list = []
