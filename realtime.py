@@ -2,9 +2,6 @@ import streamlit as st
 from datetime import datetime
 import pandas as pd
 
-st.set_page_config(
-    layout="wide")
-
 
 def load_page():
     st.title('Помощник журналиста')
