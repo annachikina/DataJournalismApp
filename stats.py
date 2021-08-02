@@ -3,7 +3,7 @@ import pandas as pd
 import altair as alt
 
 
-def plot_chart(data, x, y, x_title, y_title="", height=850):
+def plot_chart(data, x, y, x_title, y_title="", height=500):
     return (alt
             .Chart(data, height=height)
             .mark_bar(tooltip=alt.TooltipContent('encoding'))
