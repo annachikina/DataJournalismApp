@@ -45,15 +45,15 @@ def preprocessing(text):
     return preprocessed_text
 
 
-def get_topics(data, topics=5, n_keywords=5):
+def get_topics(corpus, topics=5, n_keywords=5):
     """
     Take raw corpus and train topic model
-    :param data: list of texts, corpus
+    :param corpus: list of texts, corpus
     :param topics:
     :param n_keywords:
     :return:
     """
-    preprocessed_corpus = [preprocessing(text) for text in data]
+    preprocessed_corpus = [preprocessing(text) for text in corpus]
     vectorizer = CountVectorizer()
     vec_corpus = vectorizer.fit_transform(preprocessed_corpus).toarray()
 
@@ -74,8 +74,8 @@ def get_topics(data, topics=5, n_keywords=5):
     return topic_keywords, topics_pred, vectorizer, lda
 
 
-def get_topics_pretrained(data, lda, vectorizer):
-    preprocessed_corpus = [preprocessing(text) for text in data]
+def get_topics_pretrained(corpus, lda, vectorizer):
+    preprocessed_corpus = [preprocessing(text) for text in corpus]
     vec_data = vectorizer.transform(preprocessed_corpus).toarray()
     doc_topic_matrix = lda.transform(vec_data)
     topics_pred = doc_topic_matrix.argmax(axis=1)
