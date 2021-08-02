@@ -15,18 +15,25 @@ def load_page():
         names = ner_finder.finder(input_text)
 
     with col2:
-        st.subheader('Параметры фильтрации')
+        with st.form("filter_form"):
+            st.subheader('Параметры фильтрации')
 
-        ne = st.multiselect("Выберите имя, место и/или организацию", names)
-        ne = [n.lower() for n in ne]
+            ne = st.multiselect("Выберите имя, место и/или организацию", names)
+            ne = [n.lower() for n in ne]
 
-        sources_list = otp_request.get_source(ne)
-        sources = st.multiselect('Выберите источник', sources_list)
+            unique_source_topic = otp_request.get_unique_source_topics()
 
-        topics_list = otp_request.get_topics(ne, sources)
-        topics = st.multiselect("Выберите одну или несколько рубрик", topics_list)
+            # sources_list = otp_request.get_source()
+            sources_list = sorted(unique_source_topic["source"].unique())
+            sources = st.multiselect('Выберите источник', sources_list)
 
-        dates = st.date_input("Задайте период поиска", value=[])
+            # topics_list = otp_request.get_topics()
+            topics_list = sorted(unique_source_topic["topic"].unique())
+            topics = st.multiselect("Выберите одну или несколько рубрик", topics_list)
+
+            dates = st.date_input("Задайте период поиска", value=[])
+
+            st.form_submit_button("Применить фильтры")
 
         filtered_df = otp_request.get_filtered_data(ne, [], topics, dates, sources)
 
@@ -38,14 +45,20 @@ def load_page():
             filtered_df = filtered_df.sort_values(by="_time", ascending=False)[:30]
         else:
             st.write("Всего я нашёл %d статей." % len(filtered_df))
-        article_names = filtered_df["art_ind"].values
-        selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
-        [date, title] = selected_article.split(": ")
+        if len(filtered_df) > 0:
+            article_names = filtered_df["art_ind"].values
+            selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
+            [date, title] = selected_article.split(": ")
+        else:
+            st.write("Попробуйте поменять фильтры.")
 
-    article = otp_request.get_article_by_index(selected_article)["text"].values[0]
-    article_params = filtered_df[filtered_df["art_ind"] == selected_article]
+    col1, _ = st.beta_columns([3, 1])
+    with col1:
+        if len(filtered_df) > 0:
+            article = otp_request.get_article_by_index(selected_article)["text"].values[0]
+            article_params = filtered_df[filtered_df["art_ind"] == selected_article]
 
-    st.header(title)
-    st.subheader(date)
-    st.subheader('Рубрика: %s' % article_params["topic"].values[0])
-    st.write(article)
+            st.header(title)
+            st.subheader(date)
+            st.subheader('Рубрика: %s' % article_params["topic"].values[0])
+            st.write(article)

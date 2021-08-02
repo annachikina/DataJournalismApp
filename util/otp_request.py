@@ -65,7 +65,7 @@ def get_article_by_index(index):
     return pd.DataFrame(job.dataset.load())
 
 
-def get_source(ne):
+def get_source(ne=[]):
     query_text = "| inputlookup kw_ne_ind.csv "
     for params, col_name in [(ne, "ner")]:
         if len(params) == 0:
@@ -83,7 +83,7 @@ def get_source(ne):
     return [r["source"] for r in result if len(r["source"]) < 30]
 
 
-def get_topics(ne, source):
+def get_topics(ne=[], source=[]):
     query_text = "| inputlookup kw_ne_ind.csv "
     for params, col_name in [(ne, "ner"), (source, "source")]:
         if len(params) == 0:
@@ -99,3 +99,13 @@ def get_topics(ne, source):
     job = conn.jobs.create(query_text=query_text, cache_ttl=cache_ttl, tws=tws, twf=twf, blocking=True)
     result = job.dataset.load()
     return [r["topic"] for r in result if len(r["topic"]) < 30]
+
+
+def get_unique_source_topics():
+    query_text = "| inputlookup kw_ne_ind.csv | eval group = source+\":\"+topic | dedup group "
+    cache_ttl = 59
+    tws = 11
+    twf = 22
+    job = conn.jobs.create(query_text=query_text, cache_ttl=cache_ttl, tws=tws, twf=twf, blocking=True)
+    result = pd.DataFrame(job.dataset.load())
+    return result
