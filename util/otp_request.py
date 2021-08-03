@@ -10,7 +10,7 @@ conn = Connector(host, port, user, password, loglevel="DEBUG")
 
 
 def get_dedup_list(param):
-    query_text = "| inputlookup kw_ne_ind.csv | fields %s | dedup %s" % (param, param)
+    query_text = "| readFile format=parquet path=news_kw_ne_index | fields %s | dedup %s" % (param, param)
     cache_ttl = 59
     tws = 11
     twf = 22
@@ -19,7 +19,7 @@ def get_dedup_list(param):
 
 
 def get_filtered_archive(ne, kw):
-    query_text = "| inputlookup kw_ne_ind.csv "
+    query_text = "| readFile format=parquet path=news_kw_ne_index "
     for param, col_name in [(ne, "ner"), (kw, "kw")]:
         if len(param) == 0:
             continue
@@ -33,7 +33,7 @@ def get_filtered_archive(ne, kw):
 
 
 def get_filtered_data(ne, kw, topic, dates, source, index=[]):
-    query_text = "| inputlookup kw_ne_ind.csv "
+    query_text = "| readFile format=parquet path=news_kw_ne_index "
     for params_list, col_name in [(ne, "ner"), (topic, "topic"), (source, "source"), (kw, "kw"), (index, "art_ind")]:
         params = [p for p in params_list if len(p) > 0]
         if len(params) == 0:
@@ -56,7 +56,7 @@ def get_filtered_data(ne, kw, topic, dates, source, index=[]):
 
 
 def get_article_by_index(index):
-    query_text = "| inputlookup text_ind.csv "
+    query_text = "| readFile format=parquet path=news_text_ind "
     query_text += '| where art_ind = "%s" ' % index
     cache_ttl = 59
     tws = 11
@@ -66,7 +66,7 @@ def get_article_by_index(index):
 
 
 def get_source(ne=[]):
-    query_text = "| inputlookup kw_ne_ind.csv "
+    query_text = "| readFile format=parquet path=news_kw_ne_index "
     for params, col_name in [(ne, "ner")]:
         if len(params) == 0:
             continue
@@ -84,7 +84,7 @@ def get_source(ne=[]):
 
 
 def get_topics(ne=[], source=[]):
-    query_text = "| inputlookup kw_ne_ind.csv "
+    query_text = "| readFile format=parquet path=news_kw_ne_index "
     for params, col_name in [(ne, "ner"), (source, "source")]:
         if len(params) == 0:
             continue
@@ -102,7 +102,7 @@ def get_topics(ne=[], source=[]):
 
 
 def get_unique_source_topics():
-    query_text = "| inputlookup kw_ne_ind.csv | eval group = source+\":\"+topic | dedup group "
+    query_text = "| readFile format=parquet path=news_kw_ne_index | eval group = source+\":\"+topic | dedup group "
     cache_ttl = 59
     tws = 11
     twf = 22

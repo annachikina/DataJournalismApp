@@ -1,0 +1,4 @@
+| readFile format=parquet path=news_processed
+| fields art_ind, text
+| writeFile format=parquet path=news_text_ind
+| head 20

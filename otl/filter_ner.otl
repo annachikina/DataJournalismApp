@@ -1,0 +1,16 @@
+| readFile format=parquet path=news_processed
+| fields art_ind, _time, topic, source, keywords, ne
+| eval ner = split(ne, "; ")
+| eval kw = split(keywords, ":")
+| mvexpand ner
+| mvexpand kw
+| fields - ne, keywords
+| eval ner_len = mvcount(split(ner, " "))
+| search ner_len<4
+| eval ner_len = len(ner)
+| search ner_len>2
+| eval ner = lower(ner)
+| eval kw = lower(kw)
+| fields - ner_len
+| writeFile format=parquet path=news_kw_ne_ind
+| head 20
