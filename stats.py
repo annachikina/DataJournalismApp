@@ -34,14 +34,14 @@ def load_page():
         with col1:
 
             # ТОП СУЩНОСТЕЙ
-            ner = pd.read_csv('data/stat_data/ner_top1000.csv')
+            ner = pd.read_csv('data/stat/ner_top1000.csv')
             ner_data = ner.iloc[:10]
             ner_chart = plot_chart(ner_data, "count", "ner", "Количество упоминаний")
             st.subheader('Топ-10 самых частоупоминаемых явлений в материалах архива')
             st.altair_chart(ner_chart, use_container_width=True)
 
             # ГРАФИК ПО ВСЕМ ДАТАМ
-            alldat = pd.read_csv('data/stat_data/final_date.csv')
+            alldat = pd.read_csv('data/stat/final_date.csv')
             date_stats = alldat.set_index('Дата').sort_index()[-24:]
             st.subheader('Количество опубликованных материалов за последние 2 года')
             st.line_chart(date_stats, height=500)
@@ -49,13 +49,13 @@ def load_page():
         with col2:
 
             # ГРАФИК ПО ВСЕМ РУБРИКАМ
-            alltop = pd.read_csv('data/stat_data/all_topic.csv')
+            alltop = pd.read_csv('data/stat/all_topic.csv')
             topic_chart = plot_chart(alltop, "Количество статей", "Рубрика", "Количество статей")
             st.subheader('Количество всех статей по рубрикам')
             st.altair_chart(topic_chart, use_container_width=True)
 
             # ГРАФИК КОЛИЧЕСТВО СТАТЕЙ ПО ГОДАМ
-            yeardat = pd.read_csv('data/stat_data/year_date.csv')
+            yeardat = pd.read_csv('data/stat/year_date.csv')
             year_stats = yeardat.set_index('Год')
             st.subheader('Количество доступных опубликованных материалов по годам')
             st.bar_chart(year_stats, height=500)
@@ -63,7 +63,7 @@ def load_page():
             # TODO: group barchart by source
 
         # ГРАФИК ПО ИСТОЧНИКАМ
-        source_data = pd.read_csv('data/stat_data/all_source.csv')
+        source_data = pd.read_csv('data/stat/all_source.csv')
         st.subheader('Количество статей в доступных источниках')
         source_chart = plot_chart(source_data, "Источник", "Количество статей", "Источник", height=500)
         st.altair_chart(source_chart, use_container_width=True)
@@ -74,7 +74,7 @@ def load_page():
         with col1:
 
             # ГРАФИК ПО РУБРИКАМ ЛЕНТЫ
-            lentop = pd.read_csv('data/stat_data/lenta_topic.csv')
+            lentop = pd.read_csv('data/stat/lenta_topic.csv')
             st.subheader('Количество всех статей по рубрикам')
             lenta_topic_chart = plot_chart(lentop, "Количество статей", "Рубрика", "Количество статей", height=500)
             st.altair_chart(lenta_topic_chart, use_container_width=True)
@@ -82,7 +82,7 @@ def load_page():
         with col2:
 
             # ГРАФИК ПО ДАТАМ ЛЕНТЫ
-            lendat = pd.read_csv('data/stat_data/lenta_date_final.csv')
+            lendat = pd.read_csv('data/stat/lenta_date_final.csv')
             lenta_date_stats = lendat.set_index('Дата')
             ld = lenta_date_stats.sort_index()
             st.subheader('Количество опубликованных материалов по времени')
@@ -94,7 +94,7 @@ def load_page():
         with col1:
 
             # ГРАФИК ПО РУБРИКАМ НОВОСТИ 33
-            n33top = pd.read_csv('data/stat_data/news33_topic.csv')
+            n33top = pd.read_csv('data/stat/news33_topic.csv')
             st.subheader('Количество всех статей по рубрикам')
             news33_topic_chart = plot_chart(n33top, "Количество статей", "Рубрика", "Количество статей", height=500)
             st.altair_chart(news33_topic_chart, use_container_width=True)
@@ -102,7 +102,7 @@ def load_page():
         with col2:
 
             # ГРАФИК ПО ДАТАМ НОВОСТИ 33
-            n33dat = pd.read_csv('data/stat_data/news33_date_final.csv')
+            n33dat = pd.read_csv('data/stat/news33_date_final.csv')
             n33_date_stats = n33dat.set_index('Дата')
             st.subheader('Количество опубликованных материалов по времени')
             st.line_chart(n33_date_stats, height=500)
