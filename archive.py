@@ -10,8 +10,8 @@ def load_page():
         st.subheader('Введите имя и/или ключевое слово. '
                      'Я найду все статьи, где они упоминаются отдельно или внутри другого названия.')
 
-        ne = st.text_input('Введите имя, место и/или название организации')
-        kw = st.text_input('Введите ключевое слово')
+        ne = st.text_input('Введите имя, место и/или название организации').strip().lower()
+        kw = st.text_input('Введите ключевое слово').strip().lower()
 
         st.form_submit_button("Поиск")
 
@@ -64,16 +64,17 @@ def load_page():
         else:
             st.write("Всего я нашёл %d статей." % len(filtered_df))
 
-        article_names = filtered_df["art_ind"].values
-        selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
-        [date, title] = selected_article.split(": ")
+        if len(filtered_df) > 0:
+            article_names = filtered_df["art_ind"].values
+            selected_article = st.selectbox("Выберите статью, чтобы прочитать её текст", article_names)
+            [date, title] = selected_article.split(": ")
 
-        article = otp_request.get_article_by_index(selected_article)["text"].values[0]
-        article_params = filtered_df[filtered_df["art_ind"] == selected_article]
+            article = otp_request.get_article_by_index(selected_article)["text"].values[0]
+            article_params = filtered_df[filtered_df["art_ind"] == selected_article]
 
-        st.header(title)
-        st.subheader(date)
-        st.subheader('Рубрика: %s' % article_params["topic"].values[0])
-        col1, _ = st.beta_columns([3, 1])
-        with col1:
-            st.write(article)  # TODO add newlines with "\n\r"
+            st.header(title)
+            st.subheader(date)
+            st.subheader('Рубрика: %s' % article_params["topic"].values[0])
+            col1, _ = st.beta_columns([3, 1])
+            with col1:
+                st.write(article)
