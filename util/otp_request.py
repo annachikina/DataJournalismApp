@@ -2,7 +2,7 @@ from ot_simple_connector.connector import Connector
 import pandas as pd
 import time
 
-host = '192.168.4.65'
+host = '192.168.4.184'
 port = '80'
 user = 'admin'
 password = '12345678'
